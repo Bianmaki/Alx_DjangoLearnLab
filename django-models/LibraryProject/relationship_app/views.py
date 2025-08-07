@@ -1,10 +1,22 @@
+from django.contrib.auth.decorators import user_passes_test
+from django.utils.decorators import method_decorator
 from django.shortcuts import render
 from django.views.generic.detail import DetailView
 from .models import Library
 from .models import Book
 
 
-def list_books(request):
+def is_admin(user):
+    return user.userprofile.role == 'Admin'
+
+def is_librarian(user):
+    return user.userprofile.role == 'Librarian'
+
+def is_member(user):
+    return user.userprofile.role == 'Member'
+
+
+def list_books(request):  
     books = Book.objects.all()
     all()
     return render(request, 'relationship_app/list_books.html', {'books': books})
