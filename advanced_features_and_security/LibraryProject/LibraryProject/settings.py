@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,12 +25,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-68zl68cw@h#ly3y)03^1&aj0p94q7u4!no33!la6-2te!6_p46'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'replace-me-in-dev')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL='/login/'
@@ -44,13 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'bookshelf.CustomUser',
+    'bookshelf.',
     'relationship_app',
-    'accounts'
+    'accounts',
+    'csp'
 ]
 
 MIDDLEWARE = [
-    'LibraryProject.middleware.ContentSecurityPolicyMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,9 +59,40 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'LibraryProject.middleware.ContentSecurityPolicyMiddleware',
 ]
 
+SESSION_COOKIE_SECURE = True           # send session cookie only over HTTPS
+CSRF_COOKIE_SECURE = True              # send CSRF cookie only over HTTPS
+SESSION_COOKIE_HTTPONLY = True         # JS cannot read session cookie
+CSRF_COOKIE_HTTPONLY = False           # keep False by default; only set True if you never need to read CSRF cookie via JS
+
+
+# --- Browser security headers ---
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY' 
+
+
+# HSTS - enable in production for HTTPS-only
+SECURE_HSTS_SECONDS = 31536000         # 1 year, set to 0 in development
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SECURE_SSL_REDIRECT = os.environ.get('DJANGO_SECURE_SSL_REDIRECT', 'True') == 'True'
+
+# If you're behind a reverse proxy that sets X-Forwarded-Proto:
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Content Security Policy: if using django-csp you would configure CSP_*
+# If using custom middleware, set a default policy string somewhere accessible:
+DEFAULT_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+
 ROOT_URLCONF = 'LibraryProject.urls'
+
+CSP_DEFAULT_SRC = ("'self'",)
+CSP_SCRIPT_SRC = ("'self'", 'https://trusted.cdn.example.com')
+# ... other CSP_ settings as required
+
 
 TEMPLATES = [
     {
