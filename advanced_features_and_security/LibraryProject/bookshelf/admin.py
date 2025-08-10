@@ -7,9 +7,10 @@ class CustomUserAdmin(UserAdmin):
     
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_of_birth')
     fieldsets = UserAdmin.fieldsets + (
-        ('Extra info', {'fields': ('date_of_birth', 'profile_photo')}),
+        ('Additional Info', {'fields': ('date_of_birth', 'profile_photo')}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        ('Extra info', {'fields': ('date_of_birth', 'profile_photo')}),
+        ('Additional Info', {'fields': ('date_of_birth', 'profile_photo')}),
     )
 
+admin.site.register(CustomUser, CustomUserAdmin)
