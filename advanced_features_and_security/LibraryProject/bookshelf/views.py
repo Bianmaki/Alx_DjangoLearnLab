@@ -14,7 +14,7 @@ def book_list(request):
 
 @login_required
 @permission_required('bookshelf.can_view', raise_exception=True)
-def example_form_view(request):
+def ExampleForm(request):
     """
     Handles ExampleForm submissions securely.
     Demonstrates CSRF protection and safe ORM queries.
