@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db.models import Q
 from .models import Book
 from .forms import BookForm
 
@@ -9,6 +10,15 @@ def book_list(request):
     books = Book.objects.all()
     return render(request, 'bookshelf/book_list.html', {'books': books})
 
+@login_required
+@permission_required('bookshelf.can_view', raise_exception=True)
+def search_books(request):
+    q = request.GET.get('q', '').strip()
+    if q:
+        books = Book.objects.filter(Q(title__icontains=q) | Q(author__icontains=q))
+    else:
+        books = Book.objects.none()
+    return render(request, 'bookshelf/book_list.html', {'books': books})
 
 @login_required
 @permission_required('bookshelf.can_create', raise_exception=True)
