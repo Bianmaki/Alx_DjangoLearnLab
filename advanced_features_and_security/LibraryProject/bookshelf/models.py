@@ -1,7 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 
-class CustomUserManager(UserManager):
+class CustomUserManager(BaseUserManager):
     """
     Extends Django's UserManager so we can accept the extra fields when creating users.
     """
