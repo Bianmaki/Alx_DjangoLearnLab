@@ -4,12 +4,37 @@ from django.db.models import Q
 from .models import Book
 from .forms import BookForm
 from .forms import BookSearchForm
+from .forms import ExampleForm
 
 @login_required
 @permission_required('bookshelf.can_view', raise_exception=True)
 def book_list(request):
     books = Book.objects.all()
     return render(request, 'bookshelf/book_list.html', {'books': books})
+
+@login_required
+@permission_required('bookshelf.can_view', raise_exception=True)
+def example_form_view(request):
+    """
+    Handles ExampleForm submissions securely.
+    Demonstrates CSRF protection and safe ORM queries.
+    """
+    if request.method == "POST":
+        form = ExampleForm(request.POST)
+        if form.is_valid():
+            # Cleaned data is safe to use
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            message = form.cleaned_data['message']
+            
+            # Example: you could log it, send email, or save to DB
+            # For now, just redirect to a success page
+            return redirect('form_success')
+    else:
+        form = ExampleForm()
+
+    return render(request, 'bookshelf/form_example.html', {'form': form})
+
 
 @login_required
 @permission_required('bookshelf.can_view', raise_exception=True)
@@ -72,3 +97,11 @@ def delete_book(request, pk):
         book.delete()
         return redirect('book_list')
     return render(request, 'bookshelf/delete_book.html', {'book': book})
+
+@login_required
+@permission_required('bookshelf.can_delete', raise_exception=True)
+def form_success(request):
+    """
+    Simple success page after form submission.
+    """
+    return render(request, 'bookshelf/form_success.html')
