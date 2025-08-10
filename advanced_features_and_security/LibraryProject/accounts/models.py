@@ -1,7 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.conf import settings
 
-class CustomUserManager(UserManager):
+
+class CustomUserManager(BaseUserManager):
     """
     Extends Django's UserManager so we can accept the extra fields when creating users.
     """
@@ -12,7 +14,7 @@ class CustomUserManager(UserManager):
         user = self.model(username=username, email=email, date_of_birth=date_of_birth, **extra_fields)
         if profile_photo:
             user.profile_photo = profile_photo
-        user.set_password(password)
+        user.set_password(password) 
         user.save(using=self._db)
         return user
 
@@ -32,8 +34,26 @@ class CustomUserManager(UserManager):
 class CustomUser(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
-
+    bio = models.TextField(blank=True, null=True)
+    
     objects = CustomUserManager()
 
-    def __str__(self):
-        return self.username
+def __str__(self):
+    return self.username
+    
+
+class Book(models.Model):
+    title = models.CharField(max_length=255)
+    author = models.CharField(max_length=255)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        permissions = [
+            ("can_view", "Can view book"),
+            ("can_create", "Can create book"),
+            ("can_edit", "Can edit book"),
+            ("can_delete", "Can delete book"),
+    ]
+
+def __str__(self):
+    return self.title

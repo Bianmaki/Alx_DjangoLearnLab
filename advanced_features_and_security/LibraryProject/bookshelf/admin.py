@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
 
 @admin.site.register(CustomUser)
-class CustomUserAdmin(UserAdmin):
+class CustomUserAdmin(admin.ModelAdmin):
     
     list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'date_of_birth')
     fieldsets = UserAdmin.fieldsets + (
