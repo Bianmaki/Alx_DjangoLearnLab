@@ -47,7 +47,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PEERMISSION_CLASSES': [
-        'rest_framework.permission.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 
