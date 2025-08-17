@@ -9,7 +9,7 @@ class BookAPITestCase(APITestCase):
     def setUp(self):
         # Create test user
         self.user = User.objects.create_user(username="testuser", password="testpass")
-        
+
         # Create a sample book for testing
         self.book = Book.objects.create(
             title="Test Book",
@@ -33,6 +33,7 @@ class BookAPITestCase(APITestCase):
 
     def test_create_book(self):
         """Test creating a new book"""
+        self.client.login(username="testuser", password="testpass")
         data = {"title": "New Book", "author": "New Author", "publication_year": 2024}
         response = self.client.post(self.list_url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -40,6 +41,9 @@ class BookAPITestCase(APITestCase):
 
     def test_update_book(self):
         """Test updating an existing book"""
+        self.client.login(username="testuser", password="testpass")
+
+
         data = {"title": "Updated Book", "author": "Updated Author", "publication_year": 2025}
         response = self.client.put(self.detail_url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -48,6 +52,9 @@ class BookAPITestCase(APITestCase):
 
     def test_delete_book(self):
         """Test deleting a book"""
+        self.client.login(username="testuser", password="testpass")
+
+        
         response = self.client.delete(self.detail_url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Book.objects.count(), 0)
