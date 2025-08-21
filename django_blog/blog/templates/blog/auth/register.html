@@ -2,6 +2,7 @@
 {% block title %}Register{% endblock %}
 {% block content %}
 <h1>Create Account</h1>
+<script src="{% static 'blog/script.js' %}"></script>
 <form method="post">
   {% csrf_token %}
   {{ form.as_p }}
