@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django import forms
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic.edit import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse, reverse_lazy
 from .models import Post, Comment
@@ -90,7 +90,17 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
-    
+
+def form_valid(self, form):
+        # attach logged-in user and the post
+        form.instance.author = self.request.user
+        post = get_object_or_404(Post, pk=self.kwargs['pk'])
+        form.instance.post = post
+        return super(CommentCreateView, self).form_valid(form)
+
+def get_success_url(self): 
+    return reverse_lazy('post_detail', kwargs={'pk': self.kwargs['pk']})
+
 # Delete a post
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Post
