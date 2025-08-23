@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from taggit.managers import TaggableManager
 
 
 def avatar_upload_path(instance, filename):
@@ -21,6 +22,7 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     tags = models.ManyToManyField(Tag, blank=True, related_name="posts")
+    tags = TaggableManager()
  
     def __str__(self):
         return self.title
