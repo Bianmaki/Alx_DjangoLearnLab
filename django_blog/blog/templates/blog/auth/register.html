@@ -1,12 +1,9 @@
-{% extends "blog/auth/base_auth.html" %}
-{% block title %}Register{% endblock %}
+{% extends "blog/base.html" %}
 {% block content %}
-<h1>Create Account</h1>
-<script src="{% static 'blog/script.js' %}"></script>
+<h2>Register</h2>
 <form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Create account</button>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
 </form>
-<p>Already registered? <a href="{% url 'blog:login' %}">Login</a></p>
 {% endblock %}
