@@ -1,6 +1,17 @@
-body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; }
-nav a, nav button { margin-right: .5rem; }
-.messages { list-style: none; padding: 0; }
-.messages li { margin: .5rem 0; padding: .5rem .75rem; border-radius: .5rem; }
-.messages .success { background: #e6ffed; }
-.messages .error { background: #ffe6e6; }
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+h2 {
+    color: #333;
+}
+form {
+    margin: 20px 0;
+}
+button {
+    padding: 8px 12px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+}
