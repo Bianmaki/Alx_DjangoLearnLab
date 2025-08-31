@@ -9,7 +9,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "False") == "True"
+DEBUG = False
+
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost 127.0.0.1 [::1]").split()
 
@@ -25,7 +26,7 @@ INSTALLED_APPS = [
     # Third-party
     "rest_framework",
     "rest_framework.authtoken",
-    "corsheaders"
+    "corsheaders",
 
     # Local apps
     "accounts",
@@ -78,7 +79,7 @@ DATABASES["default"] = dj_database_url.config(
     default=os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
     conn_max_age=600,
     ssl_require=os.getenv("DB_SSL", "False") == "True",
-)
+    )
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
