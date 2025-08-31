@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
 
     # Third-party
     "rest_framework",
@@ -76,7 +77,7 @@ DATABASES = {
 DATABASES["default"] = dj_database_url.config(
     default=os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
     conn_max_age=600,
-    ssl_require=True if os.getenv("DB_SSL", "True") == "True" else False,
+    ssl_require=False
 )
 
 # Password validation
@@ -120,3 +121,5 @@ SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True") == "True"
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "accounts.User"
