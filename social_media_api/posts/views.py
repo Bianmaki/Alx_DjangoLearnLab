@@ -25,17 +25,19 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
-    def like(self, request, pk=None):
-        post = generics.get_object_or_404(Post, pk=pk)
-        # Prevent duplicate likes using existence check
-        if Like.objects.filter(post=post, user=request.user).exists():
-            return Response({"detail": "Already liked"}, status=status.HTTP_400_BAD_REQUEST)
-        like, created = Like.objects.get_or_create(post=post, user=request.user)  # explicit create
-        # create notification: actor=request.user, recipient=post.author
-        if post.author != request.user:
-            Notification.create_notification(actor=request.user, recipient=post.author, verb='liked your post', target=post)
-        return Response(LikeSerializer(like).data, status=status.HTTP_201_CREATED)
+        @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+        def like(self, request, pk=None):
+            post = generics.get_object_or_404(Post, pk=pk)
+            like, created = Like.objects.get_or_create(user=request.user, post=post)  # 👈 must be exactly like this
+            if created:
+                Notification.objects.create(
+                    recipient=post.author,
+                    actor=request.user,
+                    verb="liked your post",
+                    target=post
+                )
+            return Response({"detail": "Post liked."}, status=status.HTTP_201_CREATED)
+        return Response({"detail": "You already liked this post."}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
