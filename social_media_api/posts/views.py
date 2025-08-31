@@ -31,7 +31,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # Prevent duplicate likes using existence check
         if Like.objects.filter(post=post, user=request.user).exists():
             return Response({"detail": "Already liked"}, status=status.HTTP_400_BAD_REQUEST)
-        like = Like.objects.create(post=post, user=request.user)  # explicit create
+        like, created = Like.objects.get_or_create(post=post, user=request.user)  # explicit create
         # create notification: actor=request.user, recipient=post.author
         if post.author != request.user:
             Notification.create_notification(actor=request.user, recipient=post.author, verb='liked your post', target=post)
