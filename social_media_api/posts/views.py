@@ -1,14 +1,15 @@
-from rest_framework import viewsets, filters, permissions
-from rest_framework.decorators import action
+from rest_framework import viewsets, filters, permissions, status
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from .permissions import IsAuthorOrReadOnly
+from notifications.models import Notification
 
 User = get_user_model()
 
@@ -23,6 +24,27 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def like(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        # Prevent duplicate likes using existence check
+        if Like.objects.filter(post=post, user=request.user).exists():
+            return Response({"detail": "Already liked"}, status=status.HTTP_400_BAD_REQUEST)
+        like = Like.objects.create(post=post, user=request.user)  # explicit create
+        # create notification: actor=request.user, recipient=post.author
+        if post.author != request.user:
+            Notification.create_notification(actor=request.user, recipient=post.author, verb='liked your post', target=post)
+        return Response(LikeSerializer(like).data, status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def unlike(self, request, pk=None):
+        post = get_object_or_404(Post, pk=pk)
+        deleted, _ = Like.objects.filter(post=post, user=request.user).delete()  # explicit filter().delete()
+        if deleted:
+            # optionally create a notification for unlike or remove existing notification (not implemented)
+            return Response({"detail": "Unliked"}, status=status.HTTP_200_OK)
+        return Response({"detail": "You have not liked this post"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def feed(self, request):
