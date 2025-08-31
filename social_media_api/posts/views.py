@@ -1,4 +1,4 @@
-from rest_framework import viewsets, filters, permissions, status
+from rest_framework import viewsets, generics, filters, permissions, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -27,7 +27,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def like(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         # Prevent duplicate likes using existence check
         if Like.objects.filter(post=post, user=request.user).exists():
             return Response({"detail": "Already liked"}, status=status.HTTP_400_BAD_REQUEST)
@@ -39,7 +39,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def unlike(self, request, pk=None):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         deleted, _ = Like.objects.filter(post=post, user=request.user).delete()  # explicit filter().delete()
         if deleted:
             # optionally create a notification for unlike or remove existing notification (not implemented)
@@ -74,7 +74,13 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
+        comment = serializer.save(author=self.request.user)
+        Notification.objects.create(
+            recipient=comment.post.author,
+            actor=self.request.user,
+            verb="commented on your post",
+            target=comment.post
+        )
 class FeedView(APIView):
     """
     Returns posts from users the current user follows.
